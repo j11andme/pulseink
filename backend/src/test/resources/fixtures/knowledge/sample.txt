@@ -1,0 +1,3 @@
+Plain text knowledge sample.
+
+Second paragraph without headings.

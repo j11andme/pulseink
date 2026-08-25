@@ -1,0 +1,27 @@
+server:
+  port: ${SANDBOX_PORT:8090}
+
+spring:
+  application:
+    name: pulseink-channel-sandbox
+  datasource:
+    url: ${SANDBOX_MYSQL_URL:jdbc:mysql://localhost:3307/pulseink_channel?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${SANDBOX_MYSQL_USER:pulseink_channel}
+    password: ${SANDBOX_MYSQL_PASSWORD:pulseink_channel_dev}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  kafka:
+    bootstrap-servers: ${PULSEINK_KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+
+pulseink:
+  business-zone: ${PULSEINK_BUSINESS_ZONE:Asia/Shanghai}
+  feedback:
+    topic: ${PULSEINK_KAFKA_FEEDBACK_TOPIC:pulseink.feedback.raw.v1}
+    dlt-topic: ${PULSEINK_KAFKA_FEEDBACK_DLT_TOPIC:pulseink.feedback.raw.v1-dlt}
+  outbox:
+    publisher-enabled: ${PULSEINK_OUTBOX_PUBLISHER_ENABLED:true}
+    poll-delay: ${PULSEINK_OUTBOX_POLL_DELAY:1s}
+    batch-size: ${PULSEINK_OUTBOX_BATCH_SIZE:50}
+    max-attempts: ${PULSEINK_OUTBOX_MAX_ATTEMPTS:3}
+    retry-delay: ${PULSEINK_OUTBOX_RETRY_DELAY:5s}

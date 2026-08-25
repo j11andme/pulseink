@@ -1,0 +1,12 @@
+package com.pulseink.service.content;
+
+public enum ContentErrorCode {
+    CONTENT_NOT_FOUND,
+    CONTENT_VERSION_NOT_FOUND,
+    CONTENT_VERSION_CONFLICT,
+    CONTENT_NOT_LATEST,
+    RUN_NOT_EDITABLE,
+    RUN_NOT_WAITING_APPROVAL,
+    CONTENT_ALREADY_APPROVED,
+    VALIDATION_ERROR
+}

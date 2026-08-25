@@ -1,0 +1,9 @@
+target
+data
+*.log
+hs_err_pid*
+replay_pid*
+.idea
+.vscode
+.git
+.env

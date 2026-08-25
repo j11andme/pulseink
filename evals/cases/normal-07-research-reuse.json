@@ -1,0 +1,6 @@
+{
+  "caseId":"normal-07-research-reuse","category":"NORMAL","smoke":false,
+  "taskProperties":{"decomposability":0.8,"channelCount":2,"sourceDiversity":3,"parallelResearchBranches":2,"sequentialDependency":0.4,"factualRisk":0.6,"toolBreadth":2,"latencyBudgetMs":30000},
+  "campaignInput":{"name":"Research Reuse","goal":"一次调研支撑两个渠道","audience":"开发者","channels":["BLOG","SOCIAL"],"constraints":["避免重复检索"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["approval_required","no_duplicate_tools"],"relevantChunkIds":["product-overview-001"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[],"applicablePolicies":["REACT","ORCHESTRATED","ADAPTIVE"]
+}

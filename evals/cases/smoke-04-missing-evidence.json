@@ -1,0 +1,7 @@
+{
+  "caseId":"smoke-04-missing-evidence","category":"KNOWLEDGE","smoke":true,
+  "taskProperties":{"decomposability":0.4,"channelCount":1,"sourceDiversity":2,"parallelResearchBranches":1,"sequentialDependency":0.7,"factualRisk":0.9,"toolBreadth":1,"latencyBudgetMs":20000},
+  "campaignInput":{"name":"Northstar Evidence","goal":"撰写带产品数据的文章","audience":"技术负责人","channels":["BLOG"],"constraints":["没有证据时不得编造数据"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json",
+  "expectedRules":["citation_required","approval_required"],"relevantChunkIds":["missing-stat-999"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":["MISSING_EVIDENCE"]
+}

@@ -1,0 +1,6 @@
+{
+  "caseId":"repair-15-tool-timeout","category":"REPAIR","smoke":false,
+  "taskProperties":{"decomposability":0.7,"channelCount":2,"sourceDiversity":2,"parallelResearchBranches":2,"sequentialDependency":0.5,"factualRisk":0.7,"toolBreadth":2,"latencyBudgetMs":18000},
+  "campaignInput":{"name":"Tool Timeout","goal":"在检索超时时稳定停止","audience":"工程师","channels":["BLOG","SOCIAL"],"constraints":["失败不得伪装成功"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["fail_closed"],"relevantChunkIds":["product-overview-001"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"FAILED","rubric":"rubrics/content-v1.json","failureInjection":["TOOL_TIMEOUT"],"applicablePolicies":["REACT","ORCHESTRATED","ADAPTIVE"]
+}

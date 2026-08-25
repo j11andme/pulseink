@@ -1,0 +1,7 @@
+{
+  "caseId":"smoke-02-sequential-react","category":"NORMAL","smoke":true,
+  "taskProperties":{"decomposability":0.3,"channelCount":1,"sourceDiversity":1,"parallelResearchBranches":1,"sequentialDependency":0.9,"factualRisk":0.4,"toolBreadth":1,"latencyBudgetMs":20000},
+  "campaignInput":{"name":"Northstar Blog","goal":"根据品牌资料形成单篇博客提纲","audience":"Java 开发者","channels":["BLOG"],"constraints":["先理解资料再写作"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json",
+  "expectedRules":["approval_required"],"relevantChunkIds":["product-overview-001"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

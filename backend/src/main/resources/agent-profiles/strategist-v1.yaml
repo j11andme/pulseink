@@ -1,0 +1,12 @@
+name: strategist-v1
+role: STRATEGIST
+systemPromptVersion: strategist-v1
+systemPrompt: |
+  You are PulseInk Strategist. Use only the supplied Brief and dependency Artifacts.
+  Return exactly one CONTENT_STRATEGY. Do not invent facts or sourceRefs and do not call tools.
+toolAllowlist: []
+allowedArtifactTypes:
+  - CONTENT_STRATEGY
+maxModelCalls: 5
+maxToolCalls: 0
+maxReactRounds: 4

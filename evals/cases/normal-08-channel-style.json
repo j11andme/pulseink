@@ -1,0 +1,6 @@
+{
+  "caseId":"normal-08-channel-style","category":"NORMAL","smoke":false,
+  "taskProperties":{"decomposability":0.7,"channelCount":3,"sourceDiversity":1,"parallelResearchBranches":1,"sequentialDependency":0.4,"factualRisk":0.4,"toolBreadth":1,"latencyBudgetMs":26000},
+  "campaignInput":{"name":"Channel Style","goal":"同一主题适配三种渠道表达","audience":"工程团队","channels":["BLOG","SOCIAL","SHORT_VIDEO"],"constraints":["保持品牌语气"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["approval_required","channel_length_limit"],"relevantChunkIds":["brand-tone-002"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

@@ -1,0 +1,123 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: pulseink
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3307/pulseink?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true}
+    username: ${MYSQL_USER:pulseink}
+    password: ${MYSQL_PASSWORD:pulseink_dev}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  elasticsearch:
+    uris: ${PULSEINK_ELASTICSEARCH_URL:http://localhost:9201}
+  data:
+    redis:
+      url: ${PULSEINK_REDIS_URL:redis://localhost:6380/0}
+  kafka:
+    bootstrap-servers: ${PULSEINK_KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    consumer:
+      group-id: ${PULSEINK_KAFKA_FEEDBACK_CONSUMER_GROUP:pulseink-feedback-v1}
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: manual_immediate
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+
+pulseink:
+  business-zone: ${PULSEINK_BUSINESS_ZONE:Asia/Shanghai}
+  auth:
+    jwt-secret: ${PULSEINK_JWT_SECRET:}
+    token-ttl: PT30M
+    demo-password: ${PULSEINK_DEMO_PASSWORD:}
+  model:
+    provider: ${PULSEINK_MODEL_PROVIDER:fake}
+    fallback-provider: ${PULSEINK_MODEL_FALLBACK_PROVIDER:}
+    request-timeout: ${PULSEINK_MODEL_REQUEST_TIMEOUT:180s}
+    ark:
+      api-key: ${ARK_API_KEY:}
+      base-url: ${ARK_BASE_URL:https://ark.cn-beijing.volces.com/api/v3}
+      model: ${ARK_MODEL:}
+    zhipu:
+      api-key: ${ZHIPU_API_KEY:}
+      base-url: ${ZHIPU_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      model: ${ZHIPU_MODEL:glm-5.2}
+  agent-runtime:
+    max-output-tokens-per-call: ${PULSEINK_AGENT_MAX_OUTPUT_TOKENS_PER_CALL:8192}
+    completion-timeout: ${PULSEINK_AGENT_COMPLETION_TIMEOUT:180s}
+  embedding:
+    provider: ${PULSEINK_EMBEDDING_PROVIDER:fake}
+    base-url: ${PULSEINK_EMBEDDING_BASE_URL:}
+    api-key: ${PULSEINK_EMBEDDING_API_KEY:}
+    model: ${PULSEINK_EMBEDDING_MODEL:}
+    dimensions: ${PULSEINK_EMBEDDING_DIMENSIONS:64}
+    dimension-field: ${PULSEINK_EMBEDDING_DIMENSION_FIELD:dimensions}
+    batch-size: ${PULSEINK_EMBEDDING_BATCH_SIZE:16}
+    timeout: ${PULSEINK_EMBEDDING_TIMEOUT:30s}
+  knowledge:
+    storage-root: ${PULSEINK_KNOWLEDGE_STORAGE_ROOT:./data/knowledge}
+    max-file-bytes: ${PULSEINK_KNOWLEDGE_MAX_FILE_BYTES:10485760}
+    max-extracted-characters: ${PULSEINK_KNOWLEDGE_MAX_EXTRACTED_CHARACTERS:2000000}
+    max-chunk-code-points: ${PULSEINK_KNOWLEDGE_MAX_CHUNK_CODE_POINTS:1000}
+    chunk-overlap: ${PULSEINK_KNOWLEDGE_CHUNK_OVERLAP:120}
+    max-chunks: ${PULSEINK_KNOWLEDGE_MAX_CHUNKS:2000}
+    stale-job-timeout: ${PULSEINK_KNOWLEDGE_STALE_JOB_TIMEOUT:10m}
+    index-alias: ${PULSEINK_KNOWLEDGE_INDEX_ALIAS:pulseink-knowledge-active}
+    branch-limit: ${PULSEINK_KNOWLEDGE_BRANCH_LIMIT:20}
+    rrf-constant: ${PULSEINK_KNOWLEDGE_RRF_CONSTANT:60}
+    snippet-max-code-points: ${PULSEINK_KNOWLEDGE_SNIPPET_MAX_CODE_POINTS:500}
+  orchestration:
+    max-tasks: ${PULSEINK_ORCHESTRATION_MAX_TASKS:12}
+    max-parallel-read-tasks: ${PULSEINK_ORCHESTRATION_MAX_PARALLEL_READ_TASKS:3}
+    max-context-code-points: ${PULSEINK_ORCHESTRATION_MAX_CONTEXT_CODE_POINTS:12000}
+    planner-max-model-calls: ${PULSEINK_ORCHESTRATION_PLANNER_MAX_MODEL_CALLS:3}
+    max-repair-rounds: 2
+  channel:
+    base-url: ${PULSEINK_CHANNEL_BASE_URL:http://localhost:8090/channel-api/v1}
+    connect-timeout: ${PULSEINK_CHANNEL_CONNECT_TIMEOUT:3s}
+    read-timeout: ${PULSEINK_CHANNEL_READ_TIMEOUT:10s}
+  publication:
+    worker-enabled: ${PULSEINK_PUBLICATION_WORKER_ENABLED:true}
+    poll-delay: ${PULSEINK_PUBLICATION_POLL_DELAY:1s}
+    batch-size: ${PULSEINK_PUBLICATION_BATCH_SIZE:20}
+    max-attempts: ${PULSEINK_PUBLICATION_MAX_ATTEMPTS:3}
+    retry-delay: ${PULSEINK_PUBLICATION_RETRY_DELAY:5s}
+  feedback:
+    topic: ${PULSEINK_KAFKA_FEEDBACK_TOPIC:pulseink.feedback.raw.v1}
+    dlt-topic: ${PULSEINK_KAFKA_FEEDBACK_DLT_TOPIC:pulseink.feedback.raw.v1-dlt}
+    consumer-group: ${PULSEINK_KAFKA_FEEDBACK_CONSUMER_GROUP:pulseink-feedback-v1}
+    consumer-max-attempts: ${PULSEINK_FEEDBACK_CONSUMER_MAX_ATTEMPTS:3}
+    consumer-enabled: ${PULSEINK_FEEDBACK_CONSUMER_ENABLED:true}
+  memory:
+    index-alias: ${PULSEINK_MEMORY_INDEX_ALIAS:pulseink-memory-insight-active}
+    approved-top-k: ${PULSEINK_MEMORY_APPROVED_TOP_K:3}
+    max-search-top-k: ${PULSEINK_MEMORY_MAX_SEARCH_TOP_K:10}
+    context-max-code-points: ${PULSEINK_MEMORY_CONTEXT_MAX_CODE_POINTS:12000}
+    run-cache-ttl: ${PULSEINK_RUN_MEMORY_TTL:30m}
+    index-worker-enabled: ${PULSEINK_MEMORY_INDEX_WORKER_ENABLED:true}
+    index-worker-delay: ${PULSEINK_MEMORY_INDEX_WORKER_DELAY:2s}
+    index-max-attempts: ${PULSEINK_MEMORY_INDEX_MAX_ATTEMPTS:3}
+  run-lease:
+    enabled: ${PULSEINK_RUN_LEASE_ENABLED:true}
+    ttl: ${PULSEINK_RUN_LEASE_TTL:30s}
+    renew-interval: ${PULSEINK_RUN_LEASE_RENEW_INTERVAL:10s}
+  evaluation:
+    root: ${PULSEINK_EVALUATION_ROOT:../evals}
+    report-root: ${PULSEINK_EVALUATION_REPORT_ROOT:../evals/reports}
+    judge-timeout: ${PULSEINK_EVALUATION_JUDGE_TIMEOUT:180s}
+    max-output-tokens-per-call: ${PULSEINK_EVALUATION_MAX_OUTPUT_TOKENS_PER_CALL:8192}
+    completion-timeout: ${PULSEINK_EVALUATION_COMPLETION_TIMEOUT:180s}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  health:
+    elasticsearch:
+      enabled: false

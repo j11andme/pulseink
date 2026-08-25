@@ -1,0 +1,9 @@
+pulseink:
+  auth:
+    jwt-secret: ${PULSEINK_JWT_SECRET:pulseink-local-only-jwt-secret-2026}
+    demo-password: ${PULSEINK_DEMO_PASSWORD:pulseink-demo}
+
+management:
+  health:
+    redis:
+      enabled: false

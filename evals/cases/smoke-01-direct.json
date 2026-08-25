@@ -1,0 +1,7 @@
+{
+  "caseId":"smoke-01-direct","category":"NORMAL","smoke":true,
+  "taskProperties":{"decomposability":0.1,"channelCount":1,"sourceDiversity":0,"parallelResearchBranches":0,"sequentialDependency":0.1,"factualRisk":0.1,"toolBreadth":0,"latencyBudgetMs":8000},
+  "campaignInput":{"name":"Northstar Welcome","goal":"撰写一段产品欢迎语","audience":"首次访问的工程师","channels":["SOCIAL"],"constraints":["不使用无法验证的数据"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json",
+  "expectedRules":["approval_required"],"relevantChunkIds":[],"allowedTools":[],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

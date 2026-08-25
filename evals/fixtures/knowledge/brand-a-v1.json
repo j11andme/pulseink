@@ -1,0 +1,9 @@
+{
+  "snapshotVersion": "brand-a-v1",
+  "brand": "Northstar Notes",
+  "chunks": [
+    { "chunkId": "product-overview-001", "text": "Northstar Notes 是面向工程团队的内容活动工作台。", "authority": "PRODUCT" },
+    { "chunkId": "brand-tone-002", "text": "品牌语气应专业、克制，并区分事实与推断。", "authority": "BRAND" },
+    { "chunkId": "approval-policy-003", "text": "任何内容在外部发布前都必须经过人工审批。", "authority": "POLICY" }
+  ]
+}

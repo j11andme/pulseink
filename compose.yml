@@ -1,0 +1,225 @@
+name: pulseink
+
+services:
+  mysql:
+    image: mysql:8.4.7
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-pulseink}
+      MYSQL_USER: ${MYSQL_USER:-pulseink}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pulseink_dev}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_dev}
+      SANDBOX_MYSQL_DATABASE: ${SANDBOX_MYSQL_DATABASE:-pulseink_channel}
+      SANDBOX_MYSQL_USER: ${SANDBOX_MYSQL_USER:-pulseink_channel}
+      SANDBOX_MYSQL_PASSWORD: ${SANDBOX_MYSQL_PASSWORD:-pulseink_channel_dev}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:8.8.1-alpine
+    ports:
+      - "${PULSEINK_REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  elasticsearch:
+    image: elasticsearch:9.4.2
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "${PULSEINK_ELASTICSEARCH_PORT:-9201}:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  kafka:
+    image: apache/kafka:4.3.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: CONTROLLER://:9093,INTERNAL://:29092,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:${PULSEINK_KAFKA_PORT:-9094}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    ports:
+      - "${PULSEINK_KAFKA_PORT:-9094}:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+
+  sandbox:
+    build:
+      context: ./sandbox
+    ports:
+      - "${SANDBOX_PORT:-8090}:8090"
+    environment:
+      SANDBOX_PORT: 8090
+      SANDBOX_MYSQL_URL: "jdbc:mysql://mysql:3306/${SANDBOX_MYSQL_DATABASE:-pulseink_channel}?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true"
+      SANDBOX_MYSQL_USER: ${SANDBOX_MYSQL_USER:-pulseink_channel}
+      SANDBOX_MYSQL_PASSWORD: ${SANDBOX_MYSQL_PASSWORD:-pulseink_channel_dev}
+      PULSEINK_BUSINESS_ZONE: ${PULSEINK_BUSINESS_ZONE:-Asia/Shanghai}
+      PULSEINK_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PULSEINK_KAFKA_FEEDBACK_TOPIC: ${PULSEINK_KAFKA_FEEDBACK_TOPIC:-pulseink.feedback.raw.v1}
+      PULSEINK_KAFKA_FEEDBACK_DLT_TOPIC: ${PULSEINK_KAFKA_FEEDBACK_DLT_TOPIC:-pulseink.feedback.raw.v1-dlt}
+      PULSEINK_OUTBOX_PUBLISHER_ENABLED: ${PULSEINK_OUTBOX_PUBLISHER_ENABLED:-true}
+      PULSEINK_OUTBOX_POLL_DELAY: ${PULSEINK_OUTBOX_POLL_DELAY:-1s}
+      PULSEINK_OUTBOX_BATCH_SIZE: ${PULSEINK_OUTBOX_BATCH_SIZE:-50}
+      PULSEINK_OUTBOX_MAX_ATTEMPTS: ${PULSEINK_OUTBOX_MAX_ATTEMPTS:-3}
+      PULSEINK_OUTBOX_RETRY_DELAY: ${PULSEINK_OUTBOX_RETRY_DELAY:-5s}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--output", "/dev/null", "--max-time", "3", "http://localhost:8090/channel-api/v1/posts/by-idempotency-key/00000000-0000-0000-0000-000000000000"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      MYSQL_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-pulseink}?useUnicode=true&characterEncoding=utf8&connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true"
+      MYSQL_USER: ${MYSQL_USER:-pulseink}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pulseink_dev}
+      PULSEINK_BUSINESS_ZONE: ${PULSEINK_BUSINESS_ZONE:-Asia/Shanghai}
+      PULSEINK_REDIS_URL: redis://redis:6379/0
+      PULSEINK_ELASTICSEARCH_URL: http://elasticsearch:9200
+      PULSEINK_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PULSEINK_KAFKA_FEEDBACK_TOPIC: ${PULSEINK_KAFKA_FEEDBACK_TOPIC:-pulseink.feedback.raw.v1}
+      PULSEINK_KAFKA_FEEDBACK_DLT_TOPIC: ${PULSEINK_KAFKA_FEEDBACK_DLT_TOPIC:-pulseink.feedback.raw.v1-dlt}
+      PULSEINK_KAFKA_FEEDBACK_CONSUMER_GROUP: ${PULSEINK_KAFKA_FEEDBACK_CONSUMER_GROUP:-pulseink-feedback-v1}
+      PULSEINK_FEEDBACK_CONSUMER_MAX_ATTEMPTS: ${PULSEINK_FEEDBACK_CONSUMER_MAX_ATTEMPTS:-3}
+      PULSEINK_FEEDBACK_CONSUMER_ENABLED: ${PULSEINK_FEEDBACK_CONSUMER_ENABLED:-true}
+      PULSEINK_CHANNEL_BASE_URL: http://sandbox:8090/channel-api/v1
+      PULSEINK_CHANNEL_CONNECT_TIMEOUT: ${PULSEINK_CHANNEL_CONNECT_TIMEOUT:-3s}
+      PULSEINK_CHANNEL_READ_TIMEOUT: ${PULSEINK_CHANNEL_READ_TIMEOUT:-10s}
+      PULSEINK_PUBLICATION_WORKER_ENABLED: ${PULSEINK_PUBLICATION_WORKER_ENABLED:-true}
+      PULSEINK_PUBLICATION_POLL_DELAY: ${PULSEINK_PUBLICATION_POLL_DELAY:-1s}
+      PULSEINK_PUBLICATION_BATCH_SIZE: ${PULSEINK_PUBLICATION_BATCH_SIZE:-20}
+      PULSEINK_PUBLICATION_MAX_ATTEMPTS: ${PULSEINK_PUBLICATION_MAX_ATTEMPTS:-3}
+      PULSEINK_PUBLICATION_RETRY_DELAY: ${PULSEINK_PUBLICATION_RETRY_DELAY:-5s}
+      PULSEINK_MEMORY_INDEX_ALIAS: ${PULSEINK_MEMORY_INDEX_ALIAS:-pulseink-memory-insight-active}
+      PULSEINK_MEMORY_APPROVED_TOP_K: ${PULSEINK_MEMORY_APPROVED_TOP_K:-3}
+      PULSEINK_MEMORY_MAX_SEARCH_TOP_K: ${PULSEINK_MEMORY_MAX_SEARCH_TOP_K:-10}
+      PULSEINK_MEMORY_CONTEXT_MAX_CODE_POINTS: ${PULSEINK_MEMORY_CONTEXT_MAX_CODE_POINTS:-12000}
+      PULSEINK_RUN_MEMORY_TTL: ${PULSEINK_RUN_MEMORY_TTL:-30m}
+      PULSEINK_MEMORY_INDEX_WORKER_ENABLED: ${PULSEINK_MEMORY_INDEX_WORKER_ENABLED:-true}
+      PULSEINK_MEMORY_INDEX_WORKER_DELAY: ${PULSEINK_MEMORY_INDEX_WORKER_DELAY:-2s}
+      PULSEINK_MEMORY_INDEX_MAX_ATTEMPTS: ${PULSEINK_MEMORY_INDEX_MAX_ATTEMPTS:-3}
+      PULSEINK_RUN_LEASE_ENABLED: ${PULSEINK_RUN_LEASE_ENABLED:-true}
+      PULSEINK_RUN_LEASE_TTL: ${PULSEINK_RUN_LEASE_TTL:-30s}
+      PULSEINK_RUN_LEASE_RENEW_INTERVAL: ${PULSEINK_RUN_LEASE_RENEW_INTERVAL:-10s}
+      PULSEINK_KNOWLEDGE_STORAGE_ROOT: /app/data/knowledge
+      PULSEINK_KNOWLEDGE_MAX_FILE_BYTES: ${PULSEINK_KNOWLEDGE_MAX_FILE_BYTES:-10485760}
+      PULSEINK_KNOWLEDGE_MAX_EXTRACTED_CHARACTERS: ${PULSEINK_KNOWLEDGE_MAX_EXTRACTED_CHARACTERS:-2000000}
+      PULSEINK_KNOWLEDGE_MAX_CHUNK_CODE_POINTS: ${PULSEINK_KNOWLEDGE_MAX_CHUNK_CODE_POINTS:-1000}
+      PULSEINK_KNOWLEDGE_CHUNK_OVERLAP: ${PULSEINK_KNOWLEDGE_CHUNK_OVERLAP:-120}
+      PULSEINK_KNOWLEDGE_MAX_CHUNKS: ${PULSEINK_KNOWLEDGE_MAX_CHUNKS:-2000}
+      PULSEINK_KNOWLEDGE_STALE_JOB_TIMEOUT: ${PULSEINK_KNOWLEDGE_STALE_JOB_TIMEOUT:-10m}
+      PULSEINK_KNOWLEDGE_INDEX_ALIAS: ${PULSEINK_KNOWLEDGE_INDEX_ALIAS:-pulseink-knowledge-active}
+      PULSEINK_KNOWLEDGE_BRANCH_LIMIT: ${PULSEINK_KNOWLEDGE_BRANCH_LIMIT:-20}
+      PULSEINK_KNOWLEDGE_RRF_CONSTANT: ${PULSEINK_KNOWLEDGE_RRF_CONSTANT:-60}
+      PULSEINK_KNOWLEDGE_SNIPPET_MAX_CODE_POINTS: ${PULSEINK_KNOWLEDGE_SNIPPET_MAX_CODE_POINTS:-500}
+      PULSEINK_ORCHESTRATION_MAX_TASKS: ${PULSEINK_ORCHESTRATION_MAX_TASKS:-12}
+      PULSEINK_ORCHESTRATION_MAX_PARALLEL_READ_TASKS: ${PULSEINK_ORCHESTRATION_MAX_PARALLEL_READ_TASKS:-3}
+      PULSEINK_ORCHESTRATION_MAX_CONTEXT_CODE_POINTS: ${PULSEINK_ORCHESTRATION_MAX_CONTEXT_CODE_POINTS:-12000}
+      PULSEINK_ORCHESTRATION_PLANNER_MAX_MODEL_CALLS: ${PULSEINK_ORCHESTRATION_PLANNER_MAX_MODEL_CALLS:-3}
+      PULSEINK_MODEL_PROVIDER: ${PULSEINK_MODEL_PROVIDER:-fake}
+      PULSEINK_MODEL_FALLBACK_PROVIDER: ${PULSEINK_MODEL_FALLBACK_PROVIDER:-}
+      PULSEINK_MODEL_REQUEST_TIMEOUT: ${PULSEINK_MODEL_REQUEST_TIMEOUT:-180s}
+      ARK_API_KEY: ${ARK_API_KEY:-}
+      ARK_BASE_URL: ${ARK_BASE_URL:-https://ark.cn-beijing.volces.com/api/v3}
+      ARK_MODEL: ${ARK_MODEL:-}
+      ZHIPU_API_KEY: ${ZHIPU_API_KEY:-}
+      ZHIPU_BASE_URL: ${ZHIPU_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
+      ZHIPU_MODEL: ${ZHIPU_MODEL:-glm-5.2}
+      PULSEINK_AGENT_MAX_OUTPUT_TOKENS_PER_CALL: ${PULSEINK_AGENT_MAX_OUTPUT_TOKENS_PER_CALL:-8192}
+      PULSEINK_AGENT_COMPLETION_TIMEOUT: ${PULSEINK_AGENT_COMPLETION_TIMEOUT:-180s}
+      PULSEINK_EMBEDDING_PROVIDER: ${PULSEINK_EMBEDDING_PROVIDER:-fake}
+      PULSEINK_EMBEDDING_BASE_URL: ${PULSEINK_EMBEDDING_BASE_URL:-}
+      PULSEINK_EMBEDDING_API_KEY: ${PULSEINK_EMBEDDING_API_KEY:-}
+      PULSEINK_EMBEDDING_MODEL: ${PULSEINK_EMBEDDING_MODEL:-}
+      PULSEINK_EMBEDDING_DIMENSIONS: ${PULSEINK_EMBEDDING_DIMENSIONS:-64}
+      PULSEINK_EMBEDDING_DIMENSION_FIELD: ${PULSEINK_EMBEDDING_DIMENSION_FIELD:-dimensions}
+      PULSEINK_EMBEDDING_BATCH_SIZE: ${PULSEINK_EMBEDDING_BATCH_SIZE:-16}
+      PULSEINK_EMBEDDING_TIMEOUT: ${PULSEINK_EMBEDDING_TIMEOUT:-30s}
+      PULSEINK_EVALUATION_ROOT: /app/evals
+      PULSEINK_EVALUATION_REPORT_ROOT: /app/evals/reports
+      PULSEINK_EVALUATION_JUDGE_TIMEOUT: ${PULSEINK_EVALUATION_JUDGE_TIMEOUT:-180s}
+      PULSEINK_EVALUATION_MAX_OUTPUT_TOKENS_PER_CALL: ${PULSEINK_EVALUATION_MAX_OUTPUT_TOKENS_PER_CALL:-8192}
+      PULSEINK_EVALUATION_COMPLETION_TIMEOUT: ${PULSEINK_EVALUATION_COMPLETION_TIMEOUT:-180s}
+      PULSEINK_JWT_SECRET: ${PULSEINK_JWT_SECRET:-pulseink-local-only-jwt-secret-2026}
+      PULSEINK_DEMO_PASSWORD: ${PULSEINK_DEMO_PASSWORD:-pulseink-demo}
+    volumes:
+      - knowledge-data:/app/data/knowledge
+      - ./evals:/app/evals
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql-data:
+  redis-data:
+  elasticsearch-data:
+  kafka-data:
+  knowledge-data:

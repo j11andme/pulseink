@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "eventId": "f90a5d7b-7fe8-4f32-b9cf-f238792b60ed",
+  "eventType": "CHANNEL_METRICS_RECORDED",
+  "occurredAt": "2026-08-13T12:01:00Z",
+  "externalPostId": "43c5f8d4-88a0-44fd-a46a-b79c66e26b18",
+  "publicationId": 31,
+  "contentVersionId": 12,
+  "channel": "BLOG",
+  "metricDate": "2026-08-13",
+  "deltas": {
+    "views": 100,
+    "clicks": 12,
+    "likes": 4
+  }
+}

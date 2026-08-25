@@ -1,0 +1,6 @@
+{
+  "caseId":"knowledge-12-version-filter","category":"KNOWLEDGE","smoke":false,
+  "taskProperties":{"decomposability":0.4,"channelCount":1,"sourceDiversity":2,"parallelResearchBranches":1,"sequentialDependency":0.7,"factualRisk":0.8,"toolBreadth":1,"latencyBudgetMs":20000},
+  "campaignInput":{"name":"Version Filter","goal":"只使用 v1 冻结知识生成内容","audience":"工程师","channels":["BLOG"],"constraints":["不得混入其他版本"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["citation_required","approval_required"],"relevantChunkIds":["product-overview-001"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

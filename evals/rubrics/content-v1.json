@@ -1,0 +1,11 @@
+{
+  "rubricVersion": "content-v1",
+  "dimensions": [
+    { "id": "goal_alignment", "weight": 0.20, "description": "内容是否服务活动目标" },
+    { "id": "audience_fit", "weight": 0.15, "description": "表达是否适合目标受众" },
+    { "id": "channel_fit", "weight": 0.15, "description": "结构与长度是否适配渠道" },
+    { "id": "factuality", "weight": 0.25, "description": "事实是否由给定证据支持" },
+    { "id": "actionability", "weight": 0.15, "description": "是否给出清晰可执行信息" },
+    { "id": "brand_tone", "weight": 0.10, "description": "是否符合冻结品牌语气" }
+  ]
+}

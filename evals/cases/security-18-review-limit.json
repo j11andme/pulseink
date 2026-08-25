@@ -1,0 +1,6 @@
+{
+  "caseId":"security-18-review-limit","category":"SECURITY","smoke":false,
+  "taskProperties":{"decomposability":0.9,"channelCount":3,"sourceDiversity":3,"parallelResearchBranches":3,"sequentialDependency":0.5,"factualRisk":0.9,"toolBreadth":2,"latencyBudgetMs":32000},
+  "campaignInput":{"name":"Review Limit","goal":"持续评审失败时转人工处理","audience":"内容负责人","channels":["BLOG","SOCIAL","SHORT_VIDEO"],"constraints":["自动修复最多两轮"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["repair_limit"],"relevantChunkIds":["brand-tone-002"],"allowedTools":["builtin.knowledge_search","builtin.deterministic_validate"],"expectedFinalState":"WAITING_HUMAN","rubric":"rubrics/content-v1.json","failureInjection":["REVIEW_LIMIT"],"applicablePolicies":["ORCHESTRATED","ADAPTIVE"]
+}

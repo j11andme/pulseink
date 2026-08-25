@@ -1,0 +1,6 @@
+{
+  "caseId":"knowledge-11-semantic-recall","category":"KNOWLEDGE","smoke":false,
+  "taskProperties":{"decomposability":0.4,"channelCount":1,"sourceDiversity":2,"parallelResearchBranches":1,"sequentialDependency":0.7,"factualRisk":0.8,"toolBreadth":1,"latencyBudgetMs":20000},
+  "campaignInput":{"name":"Semantic Recall","goal":"检索团队内容协作相关资料","audience":"技术负责人","channels":["BLOG"],"constraints":["引用支持结论的知识片段"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["citation_required","approval_required"],"relevantChunkIds":["product-overview-001","brand-tone-002"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

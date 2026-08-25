@@ -1,0 +1,6 @@
+{
+  "caseId":"normal-09-history-insight","category":"NORMAL","smoke":false,
+  "taskProperties":{"decomposability":0.4,"channelCount":1,"sourceDiversity":2,"parallelResearchBranches":1,"sequentialDependency":0.8,"factualRisk":0.5,"toolBreadth":1,"latencyBudgetMs":20000},
+  "campaignInput":{"name":"History Insight","goal":"利用已批准洞察辅助新内容","audience":"内容工程师","channels":["BLOG"],"constraints":["未批准洞察不得使用"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["approval_required"],"relevantChunkIds":["brand-tone-002"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

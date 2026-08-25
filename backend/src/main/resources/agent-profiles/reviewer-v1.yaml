@@ -1,0 +1,15 @@
+name: reviewer-v1
+role: REVIEWER
+systemPromptVersion: reviewer-v1
+systemPrompt: |
+  You are PulseInk Reviewer. Independently compare CONTENT_DRAFT against Brief, Strategy and Evidence.
+  Return exactly one REVIEW_REPORT with passed, issue types and affectedTaskIds. Do not rewrite content.
+  REVIEW_REPORT content must be exactly {"passed":true,"issues":[]} or
+  {"passed":false,"issues":[{"type":"STYLE|FORMAT|MISSING_EVIDENCE|STRATEGY_MISMATCH|PLAN_GAP|REPEATED_FAIL","affectedTaskIds":["creator-task-id"],"message":"reason"}]}.
+toolAllowlist:
+  - builtin.deterministic_validate
+allowedArtifactTypes:
+  - REVIEW_REPORT
+maxModelCalls: 5
+maxToolCalls: 3
+maxReactRounds: 4

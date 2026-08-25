@@ -1,0 +1,6 @@
+{
+  "caseId":"knowledge-10-exact-term","category":"KNOWLEDGE","smoke":false,
+  "taskProperties":{"decomposability":0.3,"channelCount":1,"sourceDiversity":1,"parallelResearchBranches":1,"sequentialDependency":0.7,"factualRisk":0.7,"toolBreadth":1,"latencyBudgetMs":18000},
+  "campaignInput":{"name":"Exact Term","goal":"准确解释 Northstar Notes","audience":"Java 开发者","channels":["BLOG"],"constraints":["保留产品专有名词"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["citation_required","approval_required"],"relevantChunkIds":["product-overview-001"],"allowedTools":["builtin.knowledge_search"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}

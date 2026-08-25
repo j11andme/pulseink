@@ -1,0 +1,15 @@
+name: creator-v1
+role: CREATOR
+systemPromptVersion: creator-v1
+systemPrompt: |
+  You are PulseInk Creator. Follow the supplied CONTENT_STRATEGY, EVIDENCE_PACK and channel objective.
+  Return exactly one CONTENT_DRAFT. Any factual claim must remain traceable to supplied sourceRefs.
+  CONTENT_DRAFT content must contain non-blank string fields title and body.
+  Keep the complete structured JSON response concise and below 3000 tokens so it is never truncated.
+toolAllowlist:
+  - builtin.deterministic_validate
+allowedArtifactTypes:
+  - CONTENT_DRAFT
+maxModelCalls: 5
+maxToolCalls: 3
+maxReactRounds: 4

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pulseink.dev/evals/case.schema.json",
+  "title": "PulseInk-Eval Case v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["caseId", "category", "smoke", "taskProperties", "campaignInput", "knowledgeSnapshot", "searchFixtures", "expectedRules", "relevantChunkIds", "allowedTools", "expectedFinalState", "rubric", "failureInjection"],
+  "properties": {
+    "caseId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "category": { "enum": ["NORMAL", "KNOWLEDGE", "REPAIR", "SECURITY"] },
+    "smoke": { "type": "boolean" },
+    "taskProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decomposability", "channelCount", "sourceDiversity", "parallelResearchBranches", "sequentialDependency", "factualRisk", "toolBreadth", "latencyBudgetMs"],
+      "properties": {
+        "decomposability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "channelCount": { "type": "integer", "minimum": 1 },
+        "sourceDiversity": { "type": "integer", "minimum": 0 },
+        "parallelResearchBranches": { "type": "integer", "minimum": 0 },
+        "sequentialDependency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "factualRisk": { "type": "number", "minimum": 0, "maximum": 1 },
+        "toolBreadth": { "type": "integer", "minimum": 0 },
+        "latencyBudgetMs": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "campaignInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "goal", "audience", "channels", "constraints"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "goal": { "type": "string", "minLength": 1 },
+        "audience": { "type": "string", "minLength": 1 },
+        "channels": { "type": "array", "minItems": 1, "items": { "enum": ["BLOG", "SOCIAL", "SHORT_VIDEO"] } },
+        "constraints": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "knowledgeSnapshot": { "type": "string", "pattern": "^fixtures/knowledge/" },
+    "searchFixtures": { "type": "string", "pattern": "^fixtures/search/" },
+    "expectedRules": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "relevantChunkIds": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "allowedTools": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "expectedFinalState": { "enum": ["WAITING_APPROVAL", "WAITING_HUMAN", "FAILED"] },
+    "rubric": { "type": "string", "pattern": "^rubrics/" },
+    "failureInjection": { "type": "array", "items": { "enum": ["MISSING_EVIDENCE", "TOOL_TIMEOUT", "PROMPT_INJECTION", "SSRF", "REVIEW_LIMIT"] }, "uniqueItems": true },
+    "applicablePolicies": { "type": "array", "minItems": 1, "items": { "enum": ["DIRECT", "REACT", "ORCHESTRATED", "ADAPTIVE"] }, "uniqueItems": true }
+  }
+}

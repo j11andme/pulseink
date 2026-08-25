@@ -1,0 +1,6 @@
+{
+  "caseId":"repair-13-style","category":"REPAIR","smoke":false,
+  "taskProperties":{"decomposability":0.8,"channelCount":2,"sourceDiversity":2,"parallelResearchBranches":2,"sequentialDependency":0.5,"factualRisk":0.6,"toolBreadth":2,"latencyBudgetMs":30000},
+  "campaignInput":{"name":"Style Repair","goal":"修复不符合品牌语气的草稿","audience":"开发者","channels":["BLOG","SOCIAL"],"constraints":["最多自动修复两轮"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json","expectedRules":["approval_required","repair_limit"],"relevantChunkIds":["brand-tone-002"],"allowedTools":["builtin.knowledge_search","builtin.deterministic_validate"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[],"applicablePolicies":["ORCHESTRATED","ADAPTIVE"]
+}

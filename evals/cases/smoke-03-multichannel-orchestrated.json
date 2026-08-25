@@ -1,0 +1,7 @@
+{
+  "caseId":"smoke-03-multichannel-orchestrated","category":"NORMAL","smoke":true,
+  "taskProperties":{"decomposability":0.9,"channelCount":3,"sourceDiversity":3,"parallelResearchBranches":3,"sequentialDependency":0.4,"factualRisk":0.8,"toolBreadth":2,"latencyBudgetMs":30000},
+  "campaignInput":{"name":"Northstar Launch","goal":"为三个渠道规划产品发布内容","audience":"构建 Agent 应用的工程师","channels":["BLOG","SOCIAL","SHORT_VIDEO"],"constraints":["所有产品事实必须引用证据"]},
+  "knowledgeSnapshot":"fixtures/knowledge/brand-a-v1.json","searchFixtures":"fixtures/search/campaign-a.json",
+  "expectedRules":["citation_required","approval_required"],"relevantChunkIds":["product-overview-001","brand-tone-002"],"allowedTools":["builtin.knowledge_search","builtin.deterministic_validate"],"expectedFinalState":"WAITING_APPROVAL","rubric":"rubrics/content-v1.json","failureInjection":[]
+}
