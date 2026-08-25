@@ -1,4 +1,17 @@
+<div align="center">
+
 # PulseInk
+
+**面向内容活动的 Java Agent 智能工作台**
+
+![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
+![Spring AI](https://img.shields.io/badge/Spring_AI-2.0-6DB33F)
+![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vuedotjs&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-Apache_2.0-7B68EE)
+
+</div>
 
 PulseInk 是一个使用 Java 构建的内容活动智能工作台。用户提交活动目标、目标受众、发布渠道和内容要求后，
 系统可以检索品牌知识、选择 Agent 执行方式、生成并审核内容，在人工批准后发布到本地 Channel Sandbox，
@@ -8,6 +21,8 @@ PulseInk 是一个使用 Java 构建的内容活动智能工作台。用户提�
 和可解释评测的完整开源项目。
 
 > PulseInk 面向本地学习、技术交流和架构参考。项目提供的是产品级 MVP，不应未经安全加固直接用于生产。
+
+![PulseInk 登录后的工作台](assets/pulseink-overview.png)
 
 ## 产品流程
 
@@ -26,7 +41,7 @@ Channel Sandbox 发布 → Kafka 反馈 → Metrics
 ```
 
 Web 界面会展示模式选择、Plan DAG、实际参与角色、工具调用、Evidence、内容版本、审核意见、发布记录、
-反馈指标和评测结果，不展示模型隐藏思维链。
+反馈指标和评测结果。
 
 ## 核心能力
 
@@ -50,33 +65,7 @@ Web 界面会展示模式选择、Plan DAG、实际参与角色、工具调用�
 
 ## 系统架构
 
-```mermaid
-flowchart LR
-    U[Browser] --> F[Vue 3 / Nginx]
-    F -->|JWT + REST + SSE| B[Spring Boot Backend]
-
-    subgraph R[Java Agent Runtime]
-        S[AUTO Selector]
-        D[DIRECT]
-        RE[REACT]
-        O[ORCHESTRATED]
-        T[ToolRegistry]
-        S --> D
-        S --> RE
-        S --> O
-        RE --> T
-        O --> T
-    end
-
-    B --> R
-    B --> M[(MySQL)]
-    B --> C[(Redis)]
-    B --> E[(Elasticsearch)]
-    B --> K[(Kafka)]
-    B --> X[Channel Sandbox]
-    X --> K
-    X --> XM[(Sandbox MySQL / Outbox)]
-```
+![PulseInk 系统架构](assets/pulseink-architecture.png)
 
 Backend 采用模块化单体结构。Agent 内部使用同步调用和有界并行，Kafka 只用于 Backend 与独立 Sandbox
 之间的异步反馈边界，不用于替代普通模块调用。
@@ -140,7 +129,7 @@ docker compose down
 
 ## 使用真实模型
 
-复制 `.env.example` 后，可以选择火山方舟或智谱 OpenAI-compatible Provider：
+PulseInk 当前内置火山方舟和智谱两个 OpenAI-compatible Provider。复制 `.env.example` 后可选择其中一个：
 
 ```dotenv
 PULSEINK_MODEL_PROVIDER=ark
@@ -157,20 +146,9 @@ ZHIPU_API_KEY=your_key
 ZHIPU_MODEL=glm-5.2
 ```
 
-Embedding Provider 与 Chat Model 独立配置。真实 Key 只应写入本地 `.env`，不要写入源码、镜像或提交记录。
-
-## 推荐体验顺序
-
-1. 在 **Knowledge** 上传不含敏感信息的品牌资料，等待文档进入 READY；
-2. 在 **Campaigns** 创建包含目标、受众、渠道和约束的 Brief；
-3. 选择 AUTO 或手动模式启动 Run，观察决策、Plan、角色、工具和 Evidence；
-4. 查看 Creator 内容与 Reviewer 意见，必要时人工编辑产生新版本；
-5. 批准一个合法版本并发布到 Channel Sandbox；
-6. 查看发布收据、Kafka 反馈、Metrics 和长期经验候选；
-7. 在 **Evaluation Lab** 运行固定 Smoke，或创建一个只对当前任务生效的 Custom Case。
-
-Custom Case 的参考结果只会发送给 Judge，不会进入被测 Agent 上下文。默认只选择 DIRECT；每增加一种
-策略都会增加一次 Agent 执行和两次双顺序 Judge 调用。
+Embedding Provider 与 Chat Model 独立配置。其他 OpenAI-compatible 模型可复用或实现
+`backend/src/main/java/com/pulseink/agent/model/AgentModelPort.java`，在
+`backend/src/main/java/com/pulseink/client/model/` 下增加适配器，并在 `ModelConfiguration` 中注册 Provider。
 
 ## 仓库结构
 
@@ -181,7 +159,7 @@ pulseink/
 ├─ sandbox/       # 独立渠道模拟器与 Transactional Outbox
 ├─ evals/         # 固定 Case、Fixture、Schema、Rubric；本地报告被忽略
 ├─ compose.yml    # 应用与 MySQL、Redis、ES、Kafka 的本地拓扑
-└─ .env.example   # 不含真实密钥的环境变量模板
+└─ .env.example   # 环境变量模板
 ```
 
 ## 本地开发与测试
@@ -207,17 +185,10 @@ Channel Sandbox：
 ./sandbox/mvnw.cmd -f sandbox/pom.xml test
 ```
 
-## 安全边界
-
-- `.env`、模型 Key、JWT Secret 和真实数据库凭据不得提交。
-- 外部文档、工具返回和模型输出均作为不可信输入处理。
-- ToolRegistry 在 Java 侧执行权限与参数校验，模型输出本身不是授权凭证。
-- 发布必须经过人工 Approval；Sandbox 不会向真实社交平台发送内容。
-- Trace 记录结构化事件、工具和结果，不保存完整 Prompt、Key 或 Chain-of-Thought。
-- 本地默认账号和密码只用于开发环境，不能直接用于公网部署。
-
-安全问题请参阅 [SECURITY.md](SECURITY.md)。
-
 ## License
 
 PulseInk 使用 [Apache License 2.0](LICENSE) 开源。
+
+---
+
+如果 PulseInk 对你有帮助，欢迎点个 **Star**。它不会提高模型质量，但会显著提高维护者的更新意愿。
